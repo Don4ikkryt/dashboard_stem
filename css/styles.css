@@ -382,9 +382,17 @@ html, body {
 }
 
 .popup-aikom {
+  display: inline-block;
+  margin-top: 6px;
+  padding: 2px 8px;
+  background: #F0F4FF;
+  border: 1px solid #C7D7FF;
+  border-radius: 4px;
   font-size: 11px;
-  color: #aaa;
-  margin-top: 3px;
+  font-weight: 600;
+  color: #3B5BDB;
+  font-family: 'SF Mono', 'Fira Code', monospace;
+  letter-spacing: 0.3px;
 }
 
 .popup-mono {
