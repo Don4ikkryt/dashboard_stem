@@ -68,18 +68,13 @@ const DataLoader = (() => {
   }
 
   function enrichHromady(geojson, riskMap) {
-    const keyFields = ['cod3', 'COD3', 'katotth', 'KATOTTH', 'KOATUU', 'koatuu', 'ADMIN_4', 'id', 'ID'];
     for (const feature of geojson.features) {
       const props = feature.properties || {};
-      let cod3 = null;
-      for (const f of keyFields) {
-        if (props[f]) { cod3 = String(props[f]).trim(); break; }
-      }
+      const cod3  = props['adm3_pcode'] ? String(props['adm3_pcode']).trim() : null;
+      const risk  = cod3 ? (riskMap.get(cod3) || null) : null;
       feature.properties._cod3 = cod3;
-      feature.properties._risk = cod3 ? (riskMap.get(cod3) || null) : null;
-      feature.properties._tot  = props['tot'] === true || props['tot'] === 1 ||
-                                  props['TOT'] === true || props['TOT'] === 1 ||
-                                  String(props['status'] || '').toLowerCase() === 'tot';
+      feature.properties._risk = risk;
+      feature.properties._tot  = risk === 'Непереборний';
     }
     return geojson;
   }
