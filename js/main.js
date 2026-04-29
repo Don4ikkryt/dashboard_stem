@@ -126,24 +126,25 @@
       weight: MapConfig.MARKER_STROKE_WIDTH,
     });
 
-    const distanceIcon = space.format === 'Дистанційно'
-      ? '<span class="tag tag-remote">Дистанційно</span>'
-      : '<span class="tag tag-onsite">Очно</span>';
+    const riskColor = MapConfig.RISK_COLORS[space.riskBucket] || '#ccc';
 
-    const riskLabel = space.riskBucket
-      ? `<div class="popup-risk" style="background:${MapConfig.RISK_COLORS[space.riskBucket] || '#ccc'}20;border-left:3px solid ${MapConfig.RISK_COLORS[space.riskBucket] || '#ccc'}">${space.riskBucket}</div>`
-      : '';
-
-    m.bindPopup(`
+    const popupContent = `
       <div class="popup-content">
-        <div class="popup-type" style="color:${cfg.color}">${space.spaceType}</div>
+        <div class="popup-type" style="color:${cfg.color}">${space.spaceType || '—'}</div>
         <div class="popup-name">${space.name || '—'}</div>
-        <div class="popup-meta">${space.hromada || '—'} · ${space.oblast || '—'}</div>
-        ${distanceIcon}
-        ${riskLabel}
-        ${space.id ? `<div class="popup-id">АІКОС: ${space.id}</div>` : ''}
+        <div class="popup-row"><span class="popup-label">Громада</span><span>${space.hromada || '—'}</span></div>
+        <div class="popup-row"><span class="popup-label">Область</span><span>${space.oblast || '—'}</span></div>
+        <div class="popup-row"><span class="popup-label">Формат</span><span class="tag ${space.format === 'Дистанційно' ? 'tag-remote' : 'tag-onsite'}">${space.format || '—'}</span></div>
+        ${space.riskBucket ? `<div class="popup-row"><span class="popup-label">Ризик громади</span><span class="popup-risk-badge" style="background:${riskColor}20;color:${riskColor};border:1px solid ${riskColor}40">${space.riskBucket}</span></div>` : ''}
+        ${space.id ? `<div class="popup-row"><span class="popup-label">АІКОС</span><span>${space.id}</span></div>` : ''}
       </div>
-    `, { maxWidth: 280 });
+    `;
+
+    const popup = L.popup({ maxWidth: 280, autoPan: false, closeButton: false });
+    popup.setContent(popupContent);
+
+    m.on('mouseover', function () { this.bindPopup(popup).openPopup(); });
+    m.on('mouseout',  function () { this.closePopup(); });
 
     return m;
   }
