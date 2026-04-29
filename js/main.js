@@ -84,18 +84,18 @@ if (geojson.mountains) {
       onEachFeature(feature, layer) {
         layer.on({
           mouseover(e) {
-            if (pinnedEl?.source === layer) return;
+            if (pinnedEl?.source?.feature) return; // будь-яка громада зафіксована
             hromadaPopup
               .setLatLng(e.latlng)
               .setContent(buildHromadaContent(e.target.feature.properties))
               .openOn(map);
           },
           mousemove(e) {
-            if (pinnedEl?.source === layer) return;
+            if (pinnedEl?.source?.feature) return;
             hromadaPopup.setLatLng(e.latlng);
           },
           mouseout() {
-            if (pinnedEl?.source === layer) return;
+            if (pinnedEl?.source?.feature) return;
             map.closePopup(hromadaPopup);
           },
           click(e) {
