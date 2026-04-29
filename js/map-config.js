@@ -44,15 +44,7 @@ const MapConfig = {
     interactive: false,
   },
 
-  CHORNOBYL_STYLE: {
-    fillColor: '#1a1a1a',
-    fillOpacity: 0.75,
-    color: '#000000',
-    weight: 1,
-    interactive: false,
-  },
-
-  OBLAST_NAMES: {
+OBLAST_NAMES: {
     'UA01': 'Автономна Республіка Крим',
     'UA05': 'Вінницька область',
     'UA07': 'Волинська область',

@@ -113,7 +113,6 @@ const DataLoader = (() => {
       ['hromady',   'data/hromady.geojson'],
       ['oblasti',   'data/oblasti.geojson'],
       ['mountains', 'data/mountains.geojson'],
-      ['chornobyl', 'data/chornobyl_zone.geojson'],
     ];
 
     await Promise.all(geoFiles.map(async ([key, url]) => {

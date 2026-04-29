@@ -52,10 +52,7 @@
   let hromadyLayer = null;
   let oblastLayer  = null;
 
-  if (geojson.chornobyl) {
-    L.geoJSON(geojson.chornobyl, { style: MapConfig.CHORNOBYL_STYLE }).addTo(map);
-  }
-  if (geojson.mountains) {
+if (geojson.mountains) {
     L.geoJSON(geojson.mountains, { style: MapConfig.MOUNTAINS_STYLE }).addTo(map);
   }
 
