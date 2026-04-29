@@ -61,17 +61,9 @@
 
   if (geojson.hromady) {
     hromadyLayer = L.geoJSON(geojson.hromady, {
-      style: feature => {
-        const p = feature.properties;
-        if (p._tot) return MapConfig.HROMADA_TOT_STYLE;
-        if (p._risk && MapConfig.RISK_COLORS[p._risk]) {
-          return {
-            ...MapConfig.HROMADA_DEFAULT_STYLE,
-            fillColor: MapConfig.RISK_COLORS[p._risk],
-          };
-        }
-        return MapConfig.HROMADA_DEFAULT_STYLE;
-      },
+      style: feature => feature.properties._tot
+        ? MapConfig.HROMADA_TOT_STYLE
+        : MapConfig.HROMADA_DEFAULT_STYLE,
     }).addTo(map);
   }
 
