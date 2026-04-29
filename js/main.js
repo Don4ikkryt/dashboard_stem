@@ -76,7 +76,7 @@ if (geojson.mountains) {
               : '';
             hromadaPopup
               .setLatLng(e.latlng)
-              .setContent(`<div class="hromada-popup"><strong>${name}</strong><span>${oblast}</span>${riskHtml}</div>`)
+              .setContent(`<div class="hromada-popup"><strong>${name}</strong><span>${oblast}</span>${riskHtml}${p.adm3_pcode ? `<span class="hromada-popup-kod">${p.adm3_pcode}</span>` : ''}</div>`)
               .openOn(map);
           },
           mousemove(e) {
@@ -148,12 +148,18 @@ if (geojson.mountains) {
         <div class="popup-header">
           <div class="popup-type-badge" style="background:${cfg.color}">${space.spaceType || '—'}</div>
           <div class="popup-name">${space.name || '—'}</div>
+          ${space.id ? `<div class="popup-aikom">АІКОМ: ${space.id}</div>` : ''}
         </div>
         <div class="popup-body">
           <div class="popup-row">
             <span class="popup-label">Громада</span>
             <span class="popup-value">${space.hromada || '—'}</span>
           </div>
+          ${space.cod3 ? `
+          <div class="popup-row">
+            <span class="popup-label">КАТОТТГ</span>
+            <span class="popup-value popup-mono">${space.cod3}</span>
+          </div>` : ''}
           <div class="popup-row">
             <span class="popup-label">Область</span>
             <span class="popup-value">${space.oblast || '—'}</span>
@@ -166,11 +172,6 @@ if (geojson.mountains) {
           <div class="popup-row">
             <span class="popup-label">Ризик</span>
             <span class="popup-value"><span class="popup-risk-badge" style="background:${riskColor}18;color:${riskColor};border:1px solid ${riskColor}40">${space.riskBucket}</span></span>
-          </div>` : ''}
-          ${space.id ? `
-          <div class="popup-row">
-            <span class="popup-label">АІКОС</span>
-            <span class="popup-value" style="color:#aaa">${space.id}</span>
           </div>` : ''}
         </div>
       </div>
