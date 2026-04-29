@@ -238,73 +238,97 @@ html, body {
   flex-shrink: 0;
 }
 
-/* ── Popup ───────────────────────────────────────────────────────────── */
+/* ── Popup base ──────────────────────────────────────────────────────── */
 .leaflet-popup-content-wrapper {
-  border-radius: 10px !important;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.15) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.14), 0 2px 8px rgba(0,0,0,0.08) !important;
   padding: 0 !important;
   overflow: hidden;
+  border: 1px solid rgba(0,0,0,0.06) !important;
 }
+
+.leaflet-popup-tip-container { display: none; }
 
 .leaflet-popup-content {
   margin: 0 !important;
   width: auto !important;
 }
 
+/* ── School marker popup ─────────────────────────────────────────────── */
 .popup-content {
-  padding: 14px 16px;
-  min-width: 200px;
+  width: 260px;
+  padding: 0;
+  font-family: 'Inter', -apple-system, sans-serif;
 }
 
-.popup-type {
-  font-size: 11px;
+.popup-header {
+  padding: 12px 14px 10px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.popup-type-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 20px;
+  font-size: 10px;
   font-weight: 700;
+  letter-spacing: 0.4px;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
-  margin-bottom: 4px;
+  margin-bottom: 6px;
+  color: #fff;
 }
 
 .popup-name {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
   color: #111;
-  margin-bottom: 4px;
-  line-height: 1.3;
+  line-height: 1.4;
+  word-break: break-word;
+}
+
+.popup-body {
+  padding: 10px 14px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
 .popup-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 5px;
-  font-size: 12px;
-  color: #333;
+  display: grid;
+  grid-template-columns: 80px 1fr;
+  align-items: baseline;
+  gap: 6px;
 }
 
 .popup-label {
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 600;
-  color: #999;
+  color: #aaa;
   text-transform: uppercase;
-  letter-spacing: 0.3px;
+  letter-spacing: 0.4px;
   white-space: nowrap;
-  min-width: 90px;
-  flex-shrink: 0;
+}
+
+.popup-value {
+  font-size: 12px;
+  color: #222;
+  line-height: 1.4;
+  word-break: break-word;
 }
 
 .tag {
   display: inline-block;
-  padding: 2px 7px;
-  border-radius: 10px;
+  padding: 2px 8px;
+  border-radius: 20px;
   font-size: 11px;
   font-weight: 600;
 }
 .tag-onsite { background: #E8F5E9; color: #2E7D32; }
-.tag-remote { background: #E3F2FD; color: #1565C0; }
+.tag-remote { background: #EEF4FF; color: #1E56C4; }
 
 .popup-risk-badge {
   display: inline-block;
-  padding: 2px 7px;
+  padding: 2px 8px;
   border-radius: 4px;
   font-size: 11px;
   font-weight: 600;
@@ -312,23 +336,34 @@ html, body {
 
 /* ── Hromada hover popup ─────────────────────────────────────────────── */
 .hromada-popup {
-  font-size: 13px;
-  line-height: 1.5;
-  color: #1a1a1a;
-  white-space: nowrap;
+  min-width: 160px;
+  max-width: 240px;
+  padding: 10px 14px 12px;
+  font-family: 'Inter', -apple-system, sans-serif;
 }
+
 .hromada-popup strong {
+  display: block;
+  font-size: 13px;
   font-weight: 600;
-  display: block;
+  color: #111;
+  line-height: 1.4;
+  margin-bottom: 3px;
+  word-break: break-word;
+  white-space: normal;
 }
+
 .hromada-popup span {
-  font-size: 12px;
-  color: #666;
   display: block;
+  font-size: 11px;
+  color: #888;
+  margin-bottom: 0;
+  white-space: normal;
 }
+
 .hromada-popup-risk {
   display: inline-block;
-  margin-top: 5px;
+  margin-top: 7px;
   padding: 2px 8px;
   border-radius: 4px;
   font-size: 11px;

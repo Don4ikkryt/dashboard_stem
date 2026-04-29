@@ -148,13 +148,34 @@
 
     const popupContent = `
       <div class="popup-content">
-        <div class="popup-type" style="color:${cfg.color}">${space.spaceType || '—'}</div>
-        <div class="popup-name">${space.name || '—'}</div>
-        <div class="popup-row"><span class="popup-label">Громада</span><span>${space.hromada || '—'}</span></div>
-        <div class="popup-row"><span class="popup-label">Область</span><span>${space.oblast || '—'}</span></div>
-        <div class="popup-row"><span class="popup-label">Формат</span><span class="tag ${space.format === 'Дистанційно' ? 'tag-remote' : 'tag-onsite'}">${space.format || '—'}</span></div>
-        ${space.riskBucket ? `<div class="popup-row"><span class="popup-label">Ризик громади</span><span class="popup-risk-badge" style="background:${riskColor}20;color:${riskColor};border:1px solid ${riskColor}40">${space.riskBucket}</span></div>` : ''}
-        ${space.id ? `<div class="popup-row"><span class="popup-label">АІКОС</span><span>${space.id}</span></div>` : ''}
+        <div class="popup-header">
+          <div class="popup-type-badge" style="background:${cfg.color}">${space.spaceType || '—'}</div>
+          <div class="popup-name">${space.name || '—'}</div>
+        </div>
+        <div class="popup-body">
+          <div class="popup-row">
+            <span class="popup-label">Громада</span>
+            <span class="popup-value">${space.hromada || '—'}</span>
+          </div>
+          <div class="popup-row">
+            <span class="popup-label">Область</span>
+            <span class="popup-value">${space.oblast || '—'}</span>
+          </div>
+          <div class="popup-row">
+            <span class="popup-label">Формат</span>
+            <span class="popup-value"><span class="tag ${space.format === 'Дистанційно' ? 'tag-remote' : 'tag-onsite'}">${space.format || '—'}</span></span>
+          </div>
+          ${space.riskBucket ? `
+          <div class="popup-row">
+            <span class="popup-label">Ризик</span>
+            <span class="popup-value"><span class="popup-risk-badge" style="background:${riskColor}18;color:${riskColor};border:1px solid ${riskColor}40">${space.riskBucket}</span></span>
+          </div>` : ''}
+          ${space.id ? `
+          <div class="popup-row">
+            <span class="popup-label">АІКОС</span>
+            <span class="popup-value" style="color:#aaa">${space.id}</span>
+          </div>` : ''}
+        </div>
       </div>
     `;
 
