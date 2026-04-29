@@ -5,6 +5,11 @@
   let allSpaces = [];
   let markerIndex = new Map(); // spaceId → L.circleMarker
   let clusterGroup = null;
+  let pinnedEl = null; // { source, popup } — зафіксований попап
+
+  function unpinAll() {
+    if (pinnedEl) { map.closePopup(pinnedEl.popup); pinnedEl = null; }
+  }
 
   const filterState = {
     oblasts:    new Set(),
@@ -25,6 +30,8 @@
   });
 
   L.control.zoom({ position: 'bottomright' }).addTo(map);
+
+  map.on('click', unpinAll);
 
   map.setMaxBounds(L.latLngBounds(
     [MapConfig.UKRAINE_BOUNDS[0][0] - 2, MapConfig.UKRAINE_BOUNDS[0][1] - 2],
@@ -59,6 +66,17 @@ if (geojson.mountains) {
   if (geojson.hromady) {
     const hromadaPopup = L.popup({ closeButton: false, autoPan: false, offset: [0, -4] });
 
+    function buildHromadaContent(p) {
+      const name      = p.adm3_name1 || '—';
+      const oblast    = MapConfig.OBLAST_NAMES[p.adm1_pcode] || '—';
+      const risk      = p._risk || null;
+      const riskColor = risk ? (MapConfig.RISK_COLORS[risk] || '#ccc') : null;
+      const riskHtml  = risk
+        ? `<span class="hromada-popup-risk" style="background:${riskColor}20;color:${riskColor};border:1px solid ${riskColor}50">${risk}</span>`
+        : '';
+      return `<div class="hromada-popup"><strong>${name}</strong><span>${oblast}</span>${riskHtml}${p.adm3_pcode ? `<span class="hromada-popup-kod">${p.adm3_pcode}</span>` : ''}</div>`;
+    }
+
     hromadyLayer = L.geoJSON(geojson.hromady, {
       style: feature => feature.properties._tot
         ? MapConfig.HROMADA_TOT_STYLE
@@ -66,24 +84,31 @@ if (geojson.mountains) {
       onEachFeature(feature, layer) {
         layer.on({
           mouseover(e) {
-            const p      = e.target.feature.properties;
-            const name   = p.adm3_name1 || '—';
-            const oblast = MapConfig.OBLAST_NAMES[p.adm1_pcode] || '—';
-            const risk   = p._risk || null;
-            const riskColor = risk ? (MapConfig.RISK_COLORS[risk] || '#ccc') : null;
-            const riskHtml  = risk
-              ? `<span class="hromada-popup-risk" style="background:${riskColor}20;color:${riskColor};border:1px solid ${riskColor}50">${risk}</span>`
-              : '';
+            if (pinnedEl?.source === layer) return;
             hromadaPopup
               .setLatLng(e.latlng)
-              .setContent(`<div class="hromada-popup"><strong>${name}</strong><span>${oblast}</span>${riskHtml}${p.adm3_pcode ? `<span class="hromada-popup-kod">${p.adm3_pcode}</span>` : ''}</div>`)
+              .setContent(buildHromadaContent(e.target.feature.properties))
               .openOn(map);
           },
           mousemove(e) {
+            if (pinnedEl?.source === layer) return;
             hromadaPopup.setLatLng(e.latlng);
           },
           mouseout() {
+            if (pinnedEl?.source === layer) return;
             map.closePopup(hromadaPopup);
+          },
+          click(e) {
+            L.DomEvent.stopPropagation(e);
+            map.closePopup(hromadaPopup);
+            if (pinnedEl?.source === layer) { unpinAll(); return; }
+            unpinAll();
+            const pin = L.popup({ closeButton: true, autoPan: true, offset: [0, -4] })
+              .setLatLng(e.latlng)
+              .setContent(buildHromadaContent(layer.feature.properties))
+              .openOn(map);
+            pinnedEl = { source: layer, popup: pin };
+            pin.on('remove', () => { if (pinnedEl?.source === layer) pinnedEl = null; });
           },
         });
       },
@@ -177,11 +202,31 @@ if (geojson.mountains) {
       </div>
     `;
 
-    const popup = L.popup({ maxWidth: 280, autoPan: false, closeButton: false });
-    popup.setContent(popupContent);
+    const hoverPopup = L.popup({ maxWidth: 280, autoPan: false, closeButton: false })
+      .setContent(popupContent);
 
-    m.on('mouseover', function () { this.bindPopup(popup).openPopup(); });
-    m.on('mouseout',  function () { this.closePopup(); });
+    m.bindPopup(hoverPopup);
+
+    m.on('mouseover', function () {
+      if (pinnedEl?.source === this) return;
+      this.openPopup();
+    });
+    m.on('mouseout', function () {
+      if (pinnedEl?.source === this) return;
+      this.closePopup();
+    });
+    m.on('click', function (e) {
+      L.DomEvent.stopPropagation(e);
+      if (pinnedEl?.source === this) { unpinAll(); return; }
+      unpinAll();
+      const pin = L.popup({ maxWidth: 280, autoPan: true, closeButton: true })
+        .setContent(popupContent);
+      this.unbindPopup().bindPopup(pin).openPopup();
+      pinnedEl = { source: this, popup: pin };
+      pin.on('remove', () => {
+        if (pinnedEl?.source === m) { pinnedEl = null; m.unbindPopup().bindPopup(hoverPopup); }
+      });
+    });
 
     return m;
   }
