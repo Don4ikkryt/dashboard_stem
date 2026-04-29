@@ -231,9 +231,9 @@
   applyFilters();
 
   // ── Filter UI ──────────────────────────────────────────────────────────────
-  const uniqueOblasts  = [...new Set(allSpaces.map(s => s.oblast).filter(Boolean))].sort();
-  const uniqueTypes    = [...new Set(allSpaces.map(s => s.spaceType).filter(Boolean))].sort();
-  const uniqueFormats  = [...new Set(allSpaces.map(s => s.format).filter(Boolean))].sort();
+  const uniqueOblasts = [...new Set(allSpaces.map(s => s.oblast).filter(Boolean))].sort();
+  const uniqueTypes   = [...new Set(allSpaces.map(s => s.spaceType).filter(Boolean))].sort();
+  const uniqueFormats = [...new Set(allSpaces.map(s => s.format).filter(Boolean))].sort();
 
   function getFilteredHromady() {
     const src = filterState.oblasts.size > 0
@@ -242,153 +242,256 @@
     return [...new Set(src.map(s => s.hromada).filter(Boolean))].sort();
   }
 
-  // Multi-select dropdown builder
-  function buildMultiSelect(containerId, items, stateSet, onChange, placeholder) {
+  // ── Fly-to helpers ─────────────────────────────────────────────────────────
+  function flyToGroup(items, zoom) {
+    if (!items.length) return;
+    const lat = items.reduce((a, s) => a + s.lat, 0) / items.length;
+    const lon = items.reduce((a, s) => a + s.lon, 0) / items.length;
+    map.flyTo([lat, lon], zoom, { duration: 0.8 });
+  }
+
+  // ── Close all dropdowns ────────────────────────────────────────────────────
+  document.addEventListener('click', () => {
+    document.querySelectorAll('.fd-list').forEach(d => d.classList.add('hidden'));
+    document.querySelectorAll('.fd-trigger').forEach(t => t.classList.remove('open'));
+  });
+
+  // ── Dropdown with chips ────────────────────────────────────────────────────
+  function buildDropdown(containerId, getItems, stateSet, onChange, placeholder, onSelect) {
     const container = document.getElementById(containerId);
     if (!container) return;
 
-    container.innerHTML = '';
+    let items = getItems();
 
-    const summary = document.createElement('div');
-    summary.className = 'ms-summary';
-    summary.dataset.placeholder = placeholder;
+    function render() {
+      container.innerHTML = '';
 
-    const dropdown = document.createElement('div');
-    dropdown.className = 'ms-dropdown hidden';
+      const wrap = document.createElement('div');
+      wrap.className = 'fd-wrap';
 
-    function refreshSummary() {
-      if (stateSet.size === 0) {
-        summary.textContent = placeholder;
-        summary.classList.remove('active');
-      } else {
-        summary.textContent = [...stateSet].join(', ');
-        summary.classList.add('active');
-      }
-    }
+      const trigger = document.createElement('button');
+      trigger.className = 'fd-trigger' + (stateSet.size ? ' has-value' : '');
+      trigger.type = 'button';
 
-    function renderItems() {
-      dropdown.innerHTML = '';
+      const triggerLabel = document.createElement('span');
+      triggerLabel.className = 'fd-label';
+      triggerLabel.textContent = stateSet.size ? `${stateSet.size} обрано` : placeholder;
 
-      const searchInput = document.createElement('input');
-      searchInput.className = 'ms-search';
-      searchInput.placeholder = 'Пошук...';
-      searchInput.addEventListener('input', () => {
-        const q = searchInput.value.toLowerCase();
-        dropdown.querySelectorAll('.ms-item').forEach(el => {
-          el.style.display = el.dataset.value.toLowerCase().includes(q) ? '' : 'none';
+      const arrow = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      arrow.setAttribute('width', '12'); arrow.setAttribute('height', '12');
+      arrow.setAttribute('viewBox', '0 0 12 12');
+      const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      path.setAttribute('d', 'M2 4l4 4 4-4');
+      path.setAttribute('stroke', 'currentColor'); path.setAttribute('stroke-width', '1.5');
+      path.setAttribute('fill', 'none'); path.setAttribute('stroke-linecap', 'round');
+      arrow.appendChild(path);
+      trigger.appendChild(triggerLabel); trigger.appendChild(arrow);
+
+      const list = document.createElement('div');
+      list.className = 'fd-list hidden';
+
+      const search = document.createElement('input');
+      search.className = 'fd-search'; search.placeholder = 'Пошук...';
+      list.appendChild(search);
+
+      const itemsWrap = document.createElement('div');
+      list.appendChild(itemsWrap);
+
+      function renderItems(q = '') {
+        itemsWrap.innerHTML = '';
+        const filtered = q ? items.filter(v => v.toLowerCase().includes(q.toLowerCase())) : items;
+        filtered.forEach(item => {
+          const label = document.createElement('label');
+          label.className = 'fd-item' + (stateSet.has(item) ? ' checked' : '');
+          const cb = document.createElement('input');
+          cb.type = 'checkbox'; cb.checked = stateSet.has(item);
+          cb.addEventListener('change', e => {
+            e.stopPropagation();
+            if (cb.checked) { stateSet.add(item); if (onSelect) onSelect(item); }
+            else             { stateSet.delete(item); }
+            label.classList.toggle('checked', cb.checked);
+            updateTrigger(); updateChips(); onChange();
+          });
+          const text = document.createElement('span');
+          text.textContent = item;
+          label.appendChild(cb); label.appendChild(text);
+          itemsWrap.appendChild(label);
         });
-      });
-      dropdown.appendChild(searchInput);
+      }
 
-      const clearBtn = document.createElement('div');
-      clearBtn.className = 'ms-clear';
-      clearBtn.textContent = 'Очистити';
-      clearBtn.addEventListener('click', e => {
-        e.stopPropagation();
-        stateSet.clear();
-        refreshSummary();
-        renderItems();
-        onChange();
-      });
-      dropdown.appendChild(clearBtn);
+      search.addEventListener('input', e => { e.stopPropagation(); renderItems(search.value); });
+      search.addEventListener('click', e => e.stopPropagation());
 
-      for (const item of items) {
-        const el = document.createElement('div');
-        el.className = 'ms-item' + (stateSet.has(item) ? ' selected' : '');
-        el.dataset.value = item;
-        el.textContent = item;
-        el.addEventListener('click', e => {
-          e.stopPropagation();
-          if (stateSet.has(item)) {
+      function updateTrigger() {
+        triggerLabel.textContent = stateSet.size ? `${stateSet.size} обрано` : placeholder;
+        trigger.classList.toggle('has-value', stateSet.size > 0);
+      }
+
+      const chipsRow = document.createElement('div');
+      chipsRow.className = 'chips-row';
+
+      function updateChips() {
+        chipsRow.innerHTML = '';
+        for (const item of stateSet) {
+          const chip = document.createElement('span');
+          chip.className = 'chip';
+          chip.innerHTML = `<span>${item}</span><button type="button">✕</button>`;
+          chip.querySelector('button').addEventListener('click', () => {
             stateSet.delete(item);
-            el.classList.remove('selected');
-          } else {
-            stateSet.add(item);
-            el.classList.add('selected');
-          }
-          refreshSummary();
-          onChange();
-        });
-        dropdown.appendChild(el);
+            updateTrigger(); renderItems(search.value); updateChips(); onChange();
+          });
+          chipsRow.appendChild(chip);
+        }
       }
+
+      trigger.addEventListener('click', e => {
+        e.stopPropagation();
+        const isOpen = !list.classList.contains('hidden');
+        document.querySelectorAll('.fd-list').forEach(d => d.classList.add('hidden'));
+        document.querySelectorAll('.fd-trigger').forEach(t => t.classList.remove('open'));
+        if (!isOpen) {
+          items = getItems();
+          renderItems();
+          list.classList.remove('hidden');
+          trigger.classList.add('open');
+          search.focus();
+        }
+      });
+      list.addEventListener('click', e => e.stopPropagation());
+
+      renderItems();
+      updateChips();
+      wrap.appendChild(trigger); wrap.appendChild(list);
+      container.appendChild(wrap); container.appendChild(chipsRow);
     }
 
-    summary.addEventListener('click', e => {
-      e.stopPropagation();
-      const isOpen = !dropdown.classList.contains('hidden');
-      document.querySelectorAll('.ms-dropdown').forEach(d => d.classList.add('hidden'));
-      if (!isOpen) dropdown.classList.remove('hidden');
-    });
-
-    renderItems();
-    refreshSummary();
-
-    container.appendChild(summary);
-    container.appendChild(dropdown);
-
-    return { refresh: (newItems) => { items = newItems; renderItems(); refreshSummary(); } };
+    render();
+    return { refresh() { render(); } };
   }
 
-  // Close all dropdowns on outside click
-  document.addEventListener('click', () => {
-    document.querySelectorAll('.ms-dropdown').forEach(d => d.classList.add('hidden'));
-  });
+  // ── Type buttons ───────────────────────────────────────────────────────────
+  function buildTypeButtons() {
+    const container = document.getElementById('filter-type');
+    if (!container) return;
+    container.innerHTML = '';
+    container.className = 'type-grid';
+    for (const [key, cfg] of Object.entries(MapConfig.SPACE_TYPES)) {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'type-btn' + (filterState.types.has(key) ? ' active' : '');
+      btn.style.setProperty('--tc', cfg.color);
+      btn.innerHTML = `<span class="type-dot"></span>${cfg.label}`;
+      btn.addEventListener('click', () => {
+        filterState.types.has(key) ? filterState.types.delete(key) : filterState.types.add(key);
+        btn.classList.toggle('active', filterState.types.has(key));
+        applyFilters();
+      });
+      container.appendChild(btn);
+    }
+  }
 
-  // Build oblast filter
-  buildMultiSelect('filter-oblast', uniqueOblasts, filterState.oblasts, () => {
-    // Rebuild hromada list when oblast changes
-    filterState.hromady.clear();
-    const newHromady = getFilteredHromady();
-    hromadyCtrl && hromadyCtrl.refresh(newHromady);
-    applyFilters();
-  }, 'Усі області');
+  // ── Format buttons ─────────────────────────────────────────────────────────
+  function buildFormatButtons() {
+    const container = document.getElementById('filter-format');
+    if (!container) return;
+    container.innerHTML = '';
+    container.className = 'format-row';
+    for (const fmt of uniqueFormats) {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'format-btn' + (filterState.formats.has(fmt) ? ' active' : '');
+      btn.textContent = fmt;
+      btn.addEventListener('click', () => {
+        filterState.formats.has(fmt) ? filterState.formats.delete(fmt) : filterState.formats.add(fmt);
+        btn.classList.toggle('active', filterState.formats.has(fmt));
+        applyFilters();
+      });
+      container.appendChild(btn);
+    }
+  }
 
-  // Build hromada filter (dynamic)
-  let hromadyCtrl = buildMultiSelect(
-    'filter-hromada',
-    getFilteredHromady(),
-    filterState.hromady,
-    applyFilters,
-    'Усі громади'
+  // ── Autocomplete name search ───────────────────────────────────────────────
+  const nameWrap = document.getElementById('filter-name')?.parentNode;
+  const nameInput = document.getElementById('filter-name');
+  if (nameInput && nameWrap) {
+    nameWrap.style.position = 'relative';
+    const acList = document.createElement('div');
+    acList.className = 'ac-list hidden';
+    nameWrap.appendChild(acList);
+
+    nameInput.addEventListener('input', () => {
+      const q = nameInput.value.trim();
+      filterState.nameQuery = q.toLowerCase();
+      applyFilters();
+      if (!q) { acList.classList.add('hidden'); return; }
+      const matches = allSpaces.filter(s => s.name.toLowerCase().includes(q.toLowerCase())).slice(0, 25);
+      if (!matches.length) { acList.classList.add('hidden'); return; }
+      acList.innerHTML = '';
+      for (const space of matches) {
+        const el = document.createElement('div');
+        el.className = 'ac-item';
+        const low = q.toLowerCase();
+        const idx = space.name.toLowerCase().indexOf(low);
+        el.innerHTML = space.name.slice(0, idx)
+          + `<mark>${space.name.slice(idx, idx + q.length)}</mark>`
+          + space.name.slice(idx + q.length);
+        el.addEventListener('mousedown', e => {
+          e.preventDefault();
+          nameInput.value = space.name;
+          filterState.nameQuery = space.name.toLowerCase();
+          acList.classList.add('hidden');
+          applyFilters();
+          map.flyTo([space.lat, space.lon], 14, { duration: 0.8 });
+        });
+        acList.appendChild(el);
+      }
+      acList.classList.remove('hidden');
+    });
+    nameInput.addEventListener('blur', () => setTimeout(() => acList.classList.add('hidden'), 150));
+    nameInput.addEventListener('click', e => e.stopPropagation());
+  }
+
+  // ── Build all filters ──────────────────────────────────────────────────────
+  let hromadyCtrl = null;
+
+  buildDropdown(
+    'filter-oblast',
+    () => uniqueOblasts,
+    filterState.oblasts,
+    () => {
+      filterState.hromady.clear();
+      hromadyCtrl && hromadyCtrl.refresh();
+      applyFilters();
+    },
+    'Усі області',
+    name => flyToGroup(allSpaces.filter(s => s.oblast === name), 8)
   );
 
-  // Build type filter
-  buildMultiSelect('filter-type', uniqueTypes, filterState.types, applyFilters, 'Усі типи');
+  hromadyCtrl = buildDropdown(
+    'filter-hromada',
+    getFilteredHromady,
+    filterState.hromady,
+    applyFilters,
+    'Усі громади',
+    name => flyToGroup(allSpaces.filter(s => s.hromada === name), 11)
+  );
 
-  // Build format filter
-  buildMultiSelect('filter-format', uniqueFormats, filterState.formats, applyFilters, 'Усі формати');
+  buildTypeButtons();
+  buildFormatButtons();
 
-  // Name search
-  const nameInput = document.getElementById('filter-name');
-  if (nameInput) {
-    nameInput.addEventListener('input', () => {
-      filterState.nameQuery = nameInput.value.trim();
-      applyFilters();
-    });
-  }
-
-  // Reset button
-  const resetBtn = document.getElementById('btn-reset');
-  if (resetBtn) {
-    resetBtn.addEventListener('click', () => {
-      filterState.oblasts.clear();
-      filterState.hromady.clear();
-      filterState.types.clear();
-      filterState.formats.clear();
-      filterState.nameQuery = '';
-      if (nameInput) nameInput.value = '';
-      // Rebuild all selects
-      buildMultiSelect('filter-oblast', uniqueOblasts, filterState.oblasts, () => {
-        filterState.hromady.clear();
-        hromadyCtrl && hromadyCtrl.refresh(getFilteredHromady());
-        applyFilters();
-      }, 'Усі області');
-      hromadyCtrl = buildMultiSelect('filter-hromada', getFilteredHromady(), filterState.hromady, applyFilters, 'Усі громади');
-      buildMultiSelect('filter-type', uniqueTypes, filterState.types, applyFilters, 'Усі типи');
-      buildMultiSelect('filter-format', uniqueFormats, filterState.formats, applyFilters, 'Усі формати');
-      applyFilters();
-    });
-  }
+  // ── Reset ──────────────────────────────────────────────────────────────────
+  document.getElementById('btn-reset')?.addEventListener('click', () => {
+    filterState.oblasts.clear(); filterState.hromady.clear();
+    filterState.types.clear();   filterState.formats.clear();
+    filterState.nameQuery = '';
+    if (nameInput) nameInput.value = '';
+    buildDropdown('filter-oblast', () => uniqueOblasts, filterState.oblasts, () => {
+      filterState.hromady.clear(); hromadyCtrl && hromadyCtrl.refresh(); applyFilters();
+    }, 'Усі області', name => flyToGroup(allSpaces.filter(s => s.oblast === name), 8));
+    hromadyCtrl = buildDropdown('filter-hromada', getFilteredHromady, filterState.hromady, applyFilters, 'Усі громади',
+      name => flyToGroup(allSpaces.filter(s => s.hromada === name), 11));
+    buildTypeButtons(); buildFormatButtons(); applyFilters();
+  });
 
   // ── Legend ─────────────────────────────────────────────────────────────────
   function buildLegend() {
