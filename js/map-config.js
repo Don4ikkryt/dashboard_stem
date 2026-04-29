@@ -22,6 +22,13 @@ const MapConfig = {
     weight: 0.5,
   },
 
+  HROMADA_BLACK_STYLE: {
+    fillColor: '#111111',
+    fillOpacity: 1,
+    color: '#000000',
+    weight: 0.5,
+  },
+
   HROMADA_TOT_STYLE: {
     fillColor: '#B0B0B0',
     fillOpacity: 1,

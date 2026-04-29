@@ -78,9 +78,11 @@ if (geojson.mountains) {
     }
 
     hromadyLayer = L.geoJSON(geojson.hromady, {
-      style: feature => feature.properties._tot
-        ? MapConfig.HROMADA_TOT_STYLE
-        : MapConfig.HROMADA_DEFAULT_STYLE,
+      style: feature => {
+        const p = feature.properties;
+        if (p.adm3_pcode === 'UA3200000') return MapConfig.HROMADA_BLACK_STYLE;
+        return p._tot ? MapConfig.HROMADA_TOT_STYLE : MapConfig.HROMADA_DEFAULT_STYLE;
+      },
       onEachFeature(feature, layer) {
         layer.on({
           mouseover(e) {
