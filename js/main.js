@@ -438,7 +438,7 @@ if (geojson.mountains) {
           filterState.nameQuery = space.name.toLowerCase();
           acList.classList.add('hidden');
           applyFilters();
-          map.flyTo([space.lat, space.lon], 14, { duration: 0.8 });
+          map.flyTo([space.lat, space.lon], 11, { duration: 0.8 });
         });
         acList.appendChild(el);
       }

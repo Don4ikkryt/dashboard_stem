@@ -82,7 +82,7 @@ OBLAST_NAMES: {
   MIN_ZOOM: 5,
   MAX_ZOOM: 16,
   LABEL_MIN_ZOOM: 7,
-  CLUSTER_RADIUS: 50,
+  CLUSTER_RADIUS: 100,
   CLUSTER_DISABLE_ZOOM: 11,
 
   RISK_ORDER: ['Задовільний', 'Помірний', 'Високий', 'Дуже високий', 'Непереборний'],
