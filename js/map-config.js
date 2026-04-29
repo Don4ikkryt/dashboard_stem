@@ -45,9 +45,9 @@ const MapConfig = {
   },
 
   CHORNOBYL_STYLE: {
-    fillColor: '#C8C8C8',
-    fillOpacity: 0.6,
-    color: '#999999',
+    fillColor: '#1a1a1a',
+    fillOpacity: 0.75,
+    color: '#000000',
     weight: 1,
     interactive: false,
   },
