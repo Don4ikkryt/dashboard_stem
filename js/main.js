@@ -208,11 +208,11 @@ if (geojson.mountains) {
     m.bindPopup(hoverPopup);
 
     m.on('mouseover', function () {
-      if (pinnedEl?.source === this) return;
+      if (pinnedEl && !pinnedEl.source?.feature) return; // будь-яка школа зафіксована
       this.openPopup();
     });
     m.on('mouseout', function () {
-      if (pinnedEl?.source === this) return;
+      if (pinnedEl && !pinnedEl.source?.feature) return;
       this.closePopup();
     });
     m.on('click', function (e) {
