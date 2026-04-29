@@ -69,12 +69,17 @@
       onEachFeature(feature, layer) {
         layer.on({
           mouseover(e) {
-            const p = e.target.feature.properties;
+            const p      = e.target.feature.properties;
             const name   = p.adm3_name1 || '—';
             const oblast = MapConfig.OBLAST_NAMES[p.adm1_pcode] || '—';
+            const risk   = p._risk || null;
+            const riskColor = risk ? (MapConfig.RISK_COLORS[risk] || '#ccc') : null;
+            const riskHtml  = risk
+              ? `<span class="hromada-popup-risk" style="background:${riskColor}20;color:${riskColor};border:1px solid ${riskColor}50">${risk}</span>`
+              : '';
             hromadaPopup
               .setLatLng(e.latlng)
-              .setContent(`<div class="hromada-popup"><strong>${name}</strong><br><span>${oblast}</span></div>`)
+              .setContent(`<div class="hromada-popup"><strong>${name}</strong><span>${oblast}</span>${riskHtml}</div>`)
               .openOn(map);
           },
           mousemove(e) {
