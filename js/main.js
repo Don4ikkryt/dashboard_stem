@@ -60,10 +60,31 @@
   }
 
   if (geojson.hromady) {
+    const hromadaPopup = L.popup({ closeButton: false, autoPan: false, offset: [0, -4] });
+
     hromadyLayer = L.geoJSON(geojson.hromady, {
       style: feature => feature.properties._tot
         ? MapConfig.HROMADA_TOT_STYLE
         : MapConfig.HROMADA_DEFAULT_STYLE,
+      onEachFeature(feature, layer) {
+        layer.on({
+          mouseover(e) {
+            const p = e.target.feature.properties;
+            const name   = p.adm3_name1 || '—';
+            const oblast = MapConfig.OBLAST_NAMES[p.adm1_pcode] || '—';
+            hromadaPopup
+              .setLatLng(e.latlng)
+              .setContent(`<div class="hromada-popup"><strong>${name}</strong><br><span>${oblast}</span></div>`)
+              .openOn(map);
+          },
+          mousemove(e) {
+            hromadaPopup.setLatLng(e.latlng);
+          },
+          mouseout() {
+            map.closePopup(hromadaPopup);
+          },
+        });
+      },
     }).addTo(map);
   }
 

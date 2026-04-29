@@ -310,6 +310,22 @@ html, body {
   font-weight: 600;
 }
 
+/* ── Hromada hover popup ─────────────────────────────────────────────── */
+.hromada-popup {
+  font-size: 13px;
+  line-height: 1.5;
+  color: #1a1a1a;
+  white-space: nowrap;
+}
+.hromada-popup strong {
+  font-weight: 600;
+  display: block;
+}
+.hromada-popup span {
+  font-size: 12px;
+  color: #666;
+}
+
 /* ── Cluster icon ────────────────────────────────────────────────────── */
 .cluster-icon {
   background: #2D7FF9;
