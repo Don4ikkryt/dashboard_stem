@@ -140,22 +140,8 @@ if (geojson.mountains) {
   map.on('zoomend', updateLabels);
   updateLabels();
 
-  // ── Cluster group ──────────────────────────────────────────────────────────
-  clusterGroup = L.markerClusterGroup({
-    maxClusterRadius: MapConfig.CLUSTER_RADIUS,
-    disableClusteringAtZoom: MapConfig.CLUSTER_DISABLE_ZOOM,
-    chunkedLoading: true,
-    iconCreateFunction: cluster => {
-      const count = cluster.getChildCount();
-      const size = count < 10 ? 32 : count < 100 ? 40 : 48;
-      return L.divIcon({
-        html: `<div class="cluster-icon" style="width:${size}px;height:${size}px;line-height:${size}px">${count}</div>`,
-        className: '',
-        iconSize: [size, size],
-      });
-    },
-  });
-  map.addLayer(clusterGroup);
+  // ── Marker layer ───────────────────────────────────────────────────────────
+  clusterGroup = L.layerGroup().addTo(map);
 
   // ── Marker creation ────────────────────────────────────────────────────────
   function makeMarker(space) {
@@ -266,7 +252,7 @@ if (geojson.mountains) {
       if (matchesFilter(space)) toAdd.push(m);
     }
     clusterGroup.clearLayers();
-    clusterGroup.addLayers(toAdd);
+    toAdd.forEach(m => clusterGroup.addLayer(m));
     updateCounter(toAdd.length);
   }
 
