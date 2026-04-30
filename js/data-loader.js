@@ -42,11 +42,15 @@ const DataLoader = (() => {
     let skipped = 0;
 
     for (const row of rows) {
-      const id = String(row[COL.ID] || '').trim();
-      if (id && seen.has(id)) { skipped++; continue; }
-      if (id) seen.add(id);
+      const id        = String(row[COL.ID]   || '').trim();
+      const spaceType = String(row[COL.TYPE] || '').trim();
 
       if (!isValidCoord(row[COL.LAT], row[COL.LON])) { skipped++; continue; }
+
+      // Deduplicate by (id, spaceType) — a school can have multiple space types
+      const dedupKey = id ? `${id}_${spaceType}` : null;
+      if (dedupKey && seen.has(dedupKey)) { skipped++; continue; }
+      if (dedupKey) seen.add(dedupKey);
 
       const cod3 = String(row[COL.COD3] || '').trim();
       valid.push({
@@ -54,7 +58,7 @@ const DataLoader = (() => {
         cod3,
         name:       String(row[COL.NAME]        || '').trim(),
         hromada:    String(row[COL.HROMADA]      || '').trim(),
-        spaceType:  String(row[COL.TYPE]         || '').trim(),
+        spaceType,
         format:     String(row[COL.FORMAT]       || '').trim(),
         lat:        parseFloat(row[COL.LAT]),
         lon:        parseFloat(row[COL.LON]),

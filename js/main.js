@@ -233,10 +233,14 @@ if (geojson.mountains) {
     return m;
   }
 
+  function spaceKey(space) {
+    return space.id ? `${space.id}_${space.spaceType}` : `${space.lat}_${space.lon}_${space.spaceType}`;
+  }
+
   function buildAllMarkers() {
     markerIndex.clear();
     for (const space of allSpaces) {
-      markerIndex.set(space.id || `${space.lat}_${space.lon}`, makeMarker(space));
+      markerIndex.set(spaceKey(space), makeMarker(space));
     }
   }
   buildAllMarkers();
@@ -257,8 +261,7 @@ if (geojson.mountains) {
   function applyFilters() {
     const toAdd = [];
     for (const space of allSpaces) {
-      const key = space.id || `${space.lat}_${space.lon}`;
-      const m = markerIndex.get(key);
+      const m = markerIndex.get(spaceKey(space));
       if (!m) continue;
       if (matchesFilter(space)) toAdd.push(m);
     }
