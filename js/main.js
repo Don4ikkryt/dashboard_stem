@@ -276,15 +276,16 @@ if (geojson.mountains) {
   applyFilters();
 
   // ── Filter UI ──────────────────────────────────────────────────────────────
-  const uniqueOblasts = [...new Set(allSpaces.map(s => s.oblast).filter(Boolean))].sort();
-  const uniqueTypes   = [...new Set(allSpaces.map(s => s.spaceType).filter(Boolean))].sort();
-  const uniqueFormats = [...new Set(allSpaces.map(s => s.format).filter(Boolean))].sort();
+  const ukSort = (a, b) => a.localeCompare(b, 'uk');
+  const uniqueOblasts = [...new Set(allSpaces.map(s => s.oblast).filter(Boolean))].sort(ukSort);
+  const uniqueTypes   = [...new Set(allSpaces.map(s => s.spaceType).filter(Boolean))].sort(ukSort);
+  const uniqueFormats = [...new Set(allSpaces.map(s => s.format).filter(Boolean))].sort(ukSort);
 
   function getFilteredHromady() {
     const src = filterState.oblasts.size > 0
       ? allSpaces.filter(s => filterState.oblasts.has(s.oblast))
       : allSpaces;
-    return [...new Set(src.map(s => s.hromada).filter(Boolean))].sort();
+    return [...new Set(src.map(s => s.hromada).filter(Boolean))].sort(ukSort);
   }
 
   // ── Fly-to helpers ─────────────────────────────────────────────────────────
