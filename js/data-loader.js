@@ -1,15 +1,16 @@
 const DataLoader = (() => {
   const COL = {
-    ID:          'Номер закладу в АІКОМ',
-    NAME:        'Повна назва закладу',
-    HROMADA:     'Назва ТГ',
-    TYPE:        'Тип простору',
-    FORMAT:      'Формат роботи',
+    ID:          'Номер_закладу_в_АІКОМ',
+    NAME:        'Повна_назва_закладу',
+    HROMADA:     'Назва_ТГ',
+    TYPE:        'Тип_простору',
+    FORMAT:      'Формат_роботи',
     LON:         'longitude',
     LAT:         'latitude',
-    COD3:        'hromada id',
-    OBLAST:      'region name',
-    RISK_BUCKET: 'risk bucket',
+    COD3:        'hromada_id',
+    OBLAST:      'region_name',
+    RISK_BUCKET: 'risk_bucket',
+    IS_MOUNTAIN: 'is_mountain',
   };
 
   function parseCsv(text) {
@@ -63,7 +64,8 @@ const DataLoader = (() => {
         lat:        parseFloat(row[COL.LAT]),
         lon:        parseFloat(row[COL.LON]),
         oblast:     String(row[COL.OBLAST]       || '').trim(),
-        riskBucket: String(row[COL.RISK_BUCKET]  || '').trim(),
+        riskBucket:  String(row[COL.RISK_BUCKET]  || '').trim(),
+        isMountain:  String(row[COL.IS_MOUNTAIN]  || '').trim().toUpperCase() === 'TRUE',
       });
     }
 
@@ -101,7 +103,7 @@ const DataLoader = (() => {
       riskText,
       oblastCenters,
     ] = await Promise.all([
-      fetchText('data/for_dashboard.csv'),
+      fetchText('data/for_dasboard.csv'),
       fetchText('data/risk_levels_2025_may.csv'),
       fetchJson('data/oblast_centers.json'),
     ]);

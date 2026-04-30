@@ -186,6 +186,11 @@ if (geojson.mountains) {
             <span class="popup-label">Ризик</span>
             <span class="popup-value"><span class="popup-risk-badge" style="background:${riskColor}18;color:${riskColor};border:1px solid ${riskColor}40">${space.riskBucket}</span></span>
           </div>` : ''}
+          ${space.isMountain ? `
+          <div class="popup-row">
+            <span class="popup-label"></span>
+            <span class="popup-value"><span class="tag tag-mountain">Гірський заклад</span></span>
+          </div>` : ''}
         </div>
       </div>
     `;

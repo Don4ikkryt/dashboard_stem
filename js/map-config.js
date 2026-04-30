@@ -2,7 +2,7 @@ const MapConfig = {
   SPACE_TYPES: {
     '2025 STEM':       { color: '#FF8C1A', label: '2025 STEM' },
     '2026 STEM':       { color: '#2FB344', label: '2026 STEM' },
-    '2026 НУШ':        { color: '#2D7FF9', label: '2026 НУШ' },
+    'Пілот старшої профільної': { color: '#2D7FF9', label: 'Пілот старшої профільної' },
     '2025 передпілот': { color: '#F5C518', label: '2025 передпілот' },
   },
 

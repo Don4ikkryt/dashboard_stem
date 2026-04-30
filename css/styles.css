@@ -438,8 +438,9 @@ html, body {
   font-size: 11px;
   font-weight: 600;
 }
-.tag-onsite { background: #E8F5E9; color: #2E7D32; }
-.tag-remote { background: #EEF4FF; color: #1E56C4; }
+.tag-onsite  { background: #E8F5E9; color: #2E7D32; }
+.tag-remote  { background: #EEF4FF; color: #1E56C4; }
+.tag-mountain { background: #FFF3E0; color: #E65100; }
 
 .popup-risk-badge {
   display: inline-block;
