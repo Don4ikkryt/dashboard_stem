@@ -17,6 +17,7 @@
     types:      new Set(),
     nameQuery:  '',
     formats:    new Set(),
+    mountain:   false,
   };
 
   // ── Map init ───────────────────────────────────────────────────────────────
@@ -242,6 +243,7 @@ if (geojson.mountains) {
     if (filterState.hromady.size  > 0 && !filterState.hromady.has(space.hromada)) return false;
     if (filterState.types.size    > 0 && !filterState.types.has(space.spaceType)) return false;
     if (filterState.formats.size  > 0 && !filterState.formats.has(space.format)) return false;
+    if (filterState.mountain && !space.isMountain) return false;
     if (filterState.nameQuery) {
       const q = filterState.nameQuery.toLowerCase();
       if (!space.name.toLowerCase().includes(q)) return false;
@@ -519,18 +521,37 @@ if (geojson.mountains) {
   buildTypeButtons();
   buildFormatButtons();
 
+  // ── Mountain toggle ────────────────────────────────────────────────────────
+  function buildMountainToggle() {
+    const container = document.getElementById('filter-mountain');
+    if (!container) return;
+    container.innerHTML = '';
+    container.className = 'format-row';
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'format-btn' + (filterState.mountain ? ' active' : '');
+    btn.textContent = 'Гірський заклад';
+    btn.addEventListener('click', () => {
+      filterState.mountain = !filterState.mountain;
+      btn.classList.toggle('active', filterState.mountain);
+      applyFilters();
+    });
+    container.appendChild(btn);
+  }
+  buildMountainToggle();
+
   // ── Reset ──────────────────────────────────────────────────────────────────
   document.getElementById('btn-reset')?.addEventListener('click', () => {
     filterState.oblasts.clear(); filterState.hromady.clear();
     filterState.types.clear();   filterState.formats.clear();
-    filterState.nameQuery = '';
+    filterState.nameQuery = '';  filterState.mountain = false;
     if (nameInput) nameInput.value = '';
     buildDropdown('filter-oblast', () => uniqueOblasts, filterState.oblasts, () => {
       filterState.hromady.clear(); hromadyCtrl && hromadyCtrl.refresh(); applyFilters();
     }, 'Усі області', name => flyToGroup(allSpaces.filter(s => s.oblast === name), 8));
     hromadyCtrl = buildDropdown('filter-hromada', getFilteredHromady, filterState.hromady, applyFilters, 'Усі громади',
       name => flyToGroup(allSpaces.filter(s => s.hromada === name), 11));
-    buildTypeButtons(); buildFormatButtons(); applyFilters();
+    buildTypeButtons(); buildFormatButtons(); buildMountainToggle(); applyFilters();
   });
 
   // ── Legend ─────────────────────────────────────────────────────────────────
